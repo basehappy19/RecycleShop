@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `Bin` ADD COLUMN `TotalBottle` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `RequestQRCode` ADD COLUMN `bottleCount` INTEGER NOT NULL DEFAULT 0;

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ป้อนรหัสนักเรียน</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                font-family: "Prompt", serif;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-gradient-to-br from-green-50 to-green-100 min-h-screen flex items-center justify-center p-4"
+    >
+        <!-- Container for the main content (Form + Student Info) -->
+        <div
+            id="content"
+            class="w-full max-w-md bg-white shadow-2xl rounded-xl overflow-hidden transform transition-all duration-300 hover:scale-105"
+        >
+            <!-- Form Section -->
+            <div id="formSection">
+                <div class="bg-green-600 p-6 text-center">
+                    <h2
+                        id="formTitle"
+                        class="text-3xl font-bold text-white flex items-center justify-center space-x-3"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-10 w-10"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                            />
+                        </svg>
+                        <span>ป้อนรหัสนักเรียน</span>
+                    </h2>
+                </div>
+
+                <form id="setStudentIdForm" class="p-6 space-y-6" method="PUT">
+                    <div class="space-y-2">
+                        <label
+                            for="studentId"
+                            class="block text-sm font-medium text-gray-700"
+                            >รหัสนักเรียน</label
+                        >
+                        <input
+                            type="text"
+                            id="studentId"
+                            name="studentId"
+                            placeholder="กรุณาป้อนรหัสนักเรียน"
+                            required
+                            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
+                        />
+                    </div>
+
+                    <button
+                        id="submitBtn"
+                        type="submit"
+                        class="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 transform hover:scale-102 active:scale-95"
+                    >
+                        ยืนยัน
+                    </button>
+                </form>
+            </div>
+
+            <!-- Student Info Section (will be displayed after form submission) -->
+            <div id="studentInfoSection" class="hidden">
+                <div class="bg-green-600 p-6 text-center rounded-t-xl">
+                    <h2
+                        id="studentInfoTitle"
+                        class="text-3xl font-bold text-white flex items-center justify-center space-x-3"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-10 w-10"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                            />
+                        </svg>
+                        <span>ข้อมูลนักเรียน</span>
+                    </h2>
+                </div>
+
+                <div id="studentDetails" class="p-6 text-xl mt-4">
+                    <p class="text-green-600 text-2xl">
+                        <strong>ชื่อ :</strong> <span id="studentName"></span>
+                    </p>
+                    <p class="text-green-600 text-2xl">
+                        <strong>คะแนน :</strong>
+                        <span id="studentPoints"></span>
+                    </p>
+                    <p class="my-3 text-gray-500 text-md">รอสักครู่ แล้วสามารถนำขวดใส่ถังขยะได้เลย</p>
+                    <a class="underline text-blue-400" href="http://localhost:3000" class="mt-3">ดูคะแนนล่าสุดที่นี่</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Message -->
+        <div id="loadingMessage" class="text-xl text-green-600">
+            กำลังโหลดข้อมูล...
+        </div>
+
+        <script>
+            const form = document.getElementById("setStudentIdForm");
+            const submitBtn = document.getElementById("submitBtn");
+            const formSection = document.getElementById("formSection");
+            const studentInfoSection =
+                document.getElementById("studentInfoSection");
+            const studentName = document.getElementById("studentName");
+            const studentPoints = document.getElementById("studentPoints");
+            const content = document.getElementById("content");
+            content.style.display = "none";
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const studentId = document.getElementById("studentId").value;
+                const code = new URLSearchParams(window.location.search).get(
+                    "code"
+                );
+
+                // Submit the student data
+                fetch(`/api/setStudentId`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ studentId: studentId, code: code }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data) {
+                            formSection.style.display = "none";
+                            studentInfoSection.style.display = "block";
+
+                            studentName.innerText = data.fullName;
+                            studentPoints.innerText = data.point;
+
+                            submitBtn.disabled = true;
+                            submitBtn.innerText = `รหัสนักเรียน ${studentId} ถูกบันทึกแล้ว`;
+                        } else {
+                            alert(
+                                "เกิดข้อผิดพลาด: ลิ้งค์อาจหมดอายุหรือรหัสนักเรียนถูกตั้งไว้แล้ว"
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        alert("เกิดข้อผิดพลาดในการติดต่อกับเซิร์ฟเวอร์");
+                        console.error(error);
+                    });
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+
+            if (!code) {
+                document.getElementById("loadingMessage").innerText =
+                    "ไม่พบลิ้งค์ หรือลิ้งค์หมดอายุ";
+            } else {
+                fetch(`/api/requestLink?code=${code}`)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Link not found or expired");
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        document.getElementById(
+                            "loadingMessage"
+                        ).style.display = "none";
+                        document.getElementById("content").style.display =
+                            "block";
+
+                        if (data.status === "STUDENT_ID_RECEIVED") {
+                            formSection.style.display = "none";
+                            studentInfoSection.style.display = "block";
+
+                            studentName.innerText = data.student.fullName;
+                            studentPoints.innerText = data.student.point;
+
+                            submitBtn.disabled = true;
+                            submitBtn.innerText = `รหัสนักเรียน ${data.studentId} ถูกบันทึกแล้ว`;
+                        }
+                    })
+                    .catch((error) => {
+                        document.getElementById("loadingMessage").innerText =
+                            "ไม่พบลิ้งค์นี้ หรือ คิวอาร์โค้ดถูกใช้ไปแล้ว";
+                        
+                    });
+            }
+        </script>
+    </body>
+</html>
