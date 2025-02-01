@@ -65,3 +65,7 @@ server/.env.development
 server/.env.production
 
 docker-compose.yml
+
+bin/*
+
+client/

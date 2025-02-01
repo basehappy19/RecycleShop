@@ -8,82 +8,70 @@ datasource db {
 }
 
 model Student {
-  id           Int      @id @default(autoincrement())
-  studentId    String   @unique
-  fullName     String
-  password     String
-  point        Int      @default(0)
-  totalPoint   Int      @default(0)
-  records      Record[] @relation("StudentRecord")
-  orders       Order[]  @relation("OrderByStudent")
-  requests RequestQRCode[] @relation("StudentRequest")
+  id         Int             @id @default(autoincrement())
+  studentId  String          @unique
+  classroom  String
+  fullName   String
+  password   String
+  point      Int             @default(0)
+  totalPoint Int             @default(0)
+  records    Record[]        
+  orders     Order[]         
+  requests   RequestQRCode[] 
 }
 
 model Record {
-  id         Int      @id @default(autoincrement())
-  studentId  Int
-  student    Student  @relation("StudentRecord", fields: [studentId], references: [id])
-  point      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model ListOrder {
-  id        Int  @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  point     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id        Int       @id @default(autoincrement())
+  id        Int            @id @default(autoincrement())
   name      String
-  price     Int       @default(0)
-  image     String    @default("default-product.jpg")
-  createdAt DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt DateTime  @updatedAt @db.Timestamp(6)
-  manage    ManageProduct? @relation("ManageProduct")
-  listOrders ListOrder[]
+  price     Int            @default(0)
+  image     String         @default("default-product.jpg")
+  createdAt DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt DateTime       @updatedAt @db.Timestamp(6)
+  detail    Detail?
 }
 
-model ManageProduct {
+model Detail {
   id         Int      @id @default(autoincrement())
-  productId  Int      @unique  
+  productId  Int      @unique
   inStock    Int      @default(0)
   sales      Int      @default(0)
   openSale   Boolean  @default(false)
   discount   Int      @default(0)
   newProduct Boolean  @default(false)
-  product    Product  @relation("ManageProduct", fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
 
+enum OrderStatus {
+  Pending
+  Confirmed
+  Processing
+  Shipped
+  Delivered
+  Canceled
+  Refunded
+}
 
 model Order {
-  id                Int       @id @default(autoincrement())
-  orderCodeKey      String    @db.VarChar(255)
-  roomId            Int
-  orderByStudentId  Int
-  orderByStudent    Student  @relation("OrderByStudent", fields: [orderByStudentId], references: [id])
-  totalPrice        Int
-  statusId          Int      @default(1)
-  status            Status   @relation("OrderStatus", fields: [statusId], references: [id])
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  listOrders        ListOrder[]
+  id           Int          @id @default(autoincrement())
+  studentId    Int
+  orderBy      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  totalPrice   Int
+  status       OrderStatus  @default(Pending)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
-model Status {
-  id           Int      @id @default(autoincrement())
-  title        String
-  desperation  String
-  color        String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  orders       Order[]  @relation("OrderStatus")
-}
 
 enum RequestStatus {
   WAITING_FOR_SCAN
@@ -92,28 +80,26 @@ enum RequestStatus {
 }
 
 model RequestQRCode {
-  id            Int          @id @default(autoincrement())
-  studentId     Int?
-  student       Student?     @relation("StudentRequest", fields: [studentId], references: [id])
-  binId         Int?    
-  bin           Bin?         @relation(fields: [binId], references: [id]) 
-  bottleCount   Int          @default(0)
-  link          String       @unique  
-  code          String       @unique  
-  createdAt     DateTime     @default(now()) 
-  updatedAt     DateTime     @updatedAt 
-  expiredAt     DateTime?    
-  status        RequestStatus @default(WAITING_FOR_SCAN)  
+  id          Int           @id @default(autoincrement())
+  studentId   Int?
+  student     Student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  binId       Int?
+  bin         Bin?          @relation(fields: [binId], references: [id], onDelete: Cascade)
+  bottleCount Int           @default(0)
+  link        String        @unique
+  code        String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  expiredAt   DateTime?
+  status      RequestStatus @default(WAITING_FOR_SCAN)
 }
 
 model Bin {
-  id            Int      @id @default(autoincrement())
-  no            Int
-  key           String
-  totalBottle   Int      @default(0)
-  location      String
-  createdAt     DateTime @default(now()) 
-  updatedAt     DateTime @updatedAt 
-  requests      RequestQRCode[]
+  id          Int             @id @default(autoincrement())
+  key         String          @db.Text
+  totalBottle Int             @default(0)
+  location    String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  requests    RequestQRCode[]
 }
-

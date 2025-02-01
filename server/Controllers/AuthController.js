@@ -1,67 +1,73 @@
-// const Room = require("../Models/RoomModel")
-// const bcrypt = require("bcryptjs")
-// const jwt = require("jsonwebtoken")
-// require("dotenv").config();
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-// const secretKey = process.env.SECRET_KEY
+const secretKey = process.env.SECRET_KEY;
 
-// exports.AddRoom = async (req,res) => {
-//     try {
-//         const { roomId, name, password } = req.body
+exports.AddStudent = async (req, res) => {
+    try {
+        const { studentId, name, password } = req.body;
 
-//         var room = await Room.findOne({ where: { roomId: roomId } })
-//         if(room){
-//             return res.json({ message: 'มีห้องนี้แล้ว',type: "error"}).status(400)
-//         } 
+        let student = await prisma.student.findOne({ where: { studentId } });
+        if (student) {
+            return res
+                .json({
+                    message: "มีนักเรียนรหัสนี้ซ้ำในระบบอยู่แล้ว",
+                    type: "error",
+                })
+                .status(400);
+        }
 
-//         // Encrypt
-//         const salt = await bcrypt.genSalt(10)
-//         const roomData = {
-//             roomId,
-//             name,
-//             password
-//         }
-//         roomData.password = await bcrypt.hash(password, salt)
+        // Encrypt
+        const salt = await bcrypt.genSalt(10);
+       
+        const hashPassword = await bcrypt.hash(password, salt);
 
-//         await Room.create(roomData)
-//         res.json({
-//             message: "สร้างบัญชีผู้ใช้เรียบร้อย",
-//             type: "success"
-//         }).status(201)
-//     } catch (err) {
-//         console.log(err);
-//         res.json({
-//             message:"เพิ่มห้องไม่สำเร็จ",
-//             type:"error"
-//         })
-//     }
-// }
+        await prisma.student.create({
+            data: { studentId, name, password: hashPassword },
+        })
+        res.json({
+            message: `เพิ่มบัญชีนักเรียน ${studentId} เรียบร้อยแล้ว`,
+            type: "success",
+        }).status(201);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Server Error");
+    }
+};
 
-// exports.Login = async(req, res) => {
-//     try {
-//         const { roomId, password } = req.body;
-//         var room = await Room.findOne({ where: { roomId: roomId }});
-        
-//         if(room) {
-//             const isMatch = await bcrypt.compare(password, room.password);
-//             if(!isMatch){
-//                 return res.status(400).json({message:"Password Invalid!!",type:"error"});
-//             }
-//             var payload = {
-//                 id: room.roomId,
-//                 name: room.name,
-//             };
-//             jwt.sign(payload,secretKey,{ expiresIn: '1d'},(err,token)=>{
-//                 if(err) throw err;
-//                 res.json({token,payload})
-//             })
-//         } else {
-//             res.status(400).json({message:"User Not Found!!!",type:"error"});
-//         }
-//     } catch (err) {
-//         console.log(err);
-//         res.status(500).json({
-//             message: 'Login Error',
-//         });
-//     }
-// };
+exports.Auth = async (req, res) => {
+    try {
+        const { studentId, password } = req.body;
+        let student = await prisma.student.findFirst({
+            where: { studentId: studentId },
+        });
+
+        if (student) {
+            const isMatch = await bcrypt.compare(password, student.password);
+            if (!isMatch) {
+                return res
+                    .status(400)
+                    .json({ message: "Password Invalid!!", type: "error" });
+            }
+            let payload = {
+                id: student.id,
+                fullName: student.fullName,
+            };
+            jwt.sign(payload, secretKey, { expiresIn: "1d" }, (err, token) => {
+                if (err) throw err;
+                res.json({ token, payload });
+            });
+        } else {
+            res.status(400).json({
+                message: "Student Not Found!!!",
+                type: "error",
+            });
+        }
+    } catch (err) {
+        res.status(500).send("Server Error");
+        console.error(err);
+    }
+};
